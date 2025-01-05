@@ -1,0 +1,39 @@
+import yfinance as yf
+import pandas as pd
+
+portfolio = [
+    {"ticker": "AAPL", "shares": 10},  # Example: 10 shares of Apple
+    {"ticker": "GOOGL", "shares": 5},  # Example: 5 shares of Google
+    {"ticker": "TSLA", "shares": 8},   # Example: 8 shares of Tesla
+]
+
+def fetch_stock_data(ticker):
+    stock = yf.Ticker(ticker)
+    stock_info = stock.history(period="1d")
+    if not stock_info.empty:
+        return stock_info['Close'][-1]
+    else:
+        return None
+
+def calculate_portfolio_value(portfolio):
+    total_value = 0
+    data = []
+    
+    for item in portfolio:
+        price = fetch_stock_data(item["ticker"])
+        if price:
+            value = price * item["shares"]
+            total_value += value
+            data.append({"Ticker": item["ticker"], "Shares": item["shares"], "Price": price, "Value": value})
+        else:
+            data.append({"Ticker": item["ticker"], "Shares": item["shares"], "Price": "N/A", "Value": "N/A"})
+    
+    portfolio_df = pd.DataFrame(data)
+    return portfolio_df, total_value
+
+portfolio_df, total_value = calculate_portfolio_value(portfolio)
+
+print("\nPortfolio Details:")
+print(portfolio_df)
+
+print(f"\nTotal Portfolio Value: ${total_value:,.2f}")
